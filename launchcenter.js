@@ -126,9 +126,14 @@ async function generateWidget() {
   widget.backgroundColor = new Color("#f2f2f7");
 
   const iconSize = 30; // 图标大小
-  const spacing = 5; // 图标间隔，调整此值可减少间距
+  const spacing = 5; // 图标间隔
   const itemsPerRow = 8;
   const totalRows = Math.ceil(actions.length / itemsPerRow);
+
+  const totalHeight = totalRows * iconSize + (totalRows - 1) * spacing;
+  const verticalPadding = Math.max(0, (widget.size.height - totalHeight) / 2);
+
+  widget.setPadding(verticalPadding, 10, verticalPadding, 10); // 上、右、下、左留白设置
 
   for (let row = 0; row < totalRows; row++) {
     let rowStack = widget.addStack();
