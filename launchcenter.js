@@ -53,14 +53,14 @@ async function showSettings() {
     let urlCell = row.addText(action.url || "未设置链接");
     urlCell.widthWeight = 50;
 
-    // 添加编辑按钮
+    // 进入编辑状态
     let editButton = row.addButton("编辑");
     editButton.widthWeight = 15;
     editButton.onTap = async () => {
       await editLink(i);
     };
 
-    // 添加删除按钮
+    // 删除链接
     let deleteButton = row.addButton("删除");
     deleteButton.widthWeight = 20;
     deleteButton.onTap = () => {
