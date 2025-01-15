@@ -30,11 +30,11 @@ async function showSettings() {
   for (let i = 0; i < actions.length; i++) {
     let action = actions[i];
     let row = new UITableRow();
-    row.height = 60; // 增加行高度，确保按钮区域更大
+    row.height = 60;
 
     // 添加图标
     let iconCell = row.addImage(await loadImage(action.iconUrl || ""));
-    iconCell.widthWeight = 15; // 缩小图标所占比例
+    iconCell.widthWeight = 15;
 
     // 显示链接 URL
     let urlCell = row.addText(action.url || "未设置链接");
@@ -42,18 +42,18 @@ async function showSettings() {
 
     // 添加编辑按钮
     let editButton = row.addButton("编辑");
-    editButton.widthWeight = 15; // 增加按钮的比例
+    editButton.widthWeight = 15;
     editButton.onTap = async () => {
       await editLink(i);
     };
 
     // 添加删除按钮
     let deleteButton = row.addButton("删除");
-    deleteButton.widthWeight = 20; // 保持删除按钮稍大
+    deleteButton.widthWeight = 20;
     deleteButton.onTap = () => {
-      actions.splice(i, 1); // 删除当前链接
+      actions.splice(i, 1);
       saveSettings(actions);
-      showSettings(); // 刷新界面
+      showSettings();
     };
 
     table.addRow(row);
@@ -67,7 +67,7 @@ async function showSettings() {
   addButton.onTap = async () => {
     actions.push({ url: "", iconUrl: "" });
     saveSettings(actions);
-    await editLink(actions.length - 1); // 进入新链接编辑界面
+    await editLink(actions.length - 1);
   };
   table.addRow(addRow);
 
@@ -92,30 +92,38 @@ async function editLink(index) {
   alert.title = `编辑链接 ${index + 1}`;
   alert.addTextField("链接 URL", action.url || "");
   alert.addTextField("图标 URL", action.iconUrl || "");
+  alert.addAction("从相册选择图标");
   alert.addAction("保存");
   alert.addCancelAction("取消");
 
   let response = await alert.present();
   if (response === 0) {
+    // 从相册选择图标
+    const img = await Photos.fromLibrary();
+    const path = fm.joinPath(fm.documentsDirectory(), `icon_${Date.now()}.png`);
+    fm.writeImage(path, img);
+    action.iconUrl = `file://${path}`;
+    saveSettings(actions);
+  } else if (response === 1) {
+    // 保存输入的链接和图标 URL
     action.url = alert.textFieldValue(0);
     action.iconUrl = alert.textFieldValue(1);
-    actions[index] = action; // 保存到数组
-    saveSettings(actions); // 保存到文件
+    saveSettings(actions);
   }
 
-  await showSettings(); // 返回设置界面
+  await showSettings();
 }
 
 // 预览小组件
 async function previewSettings() {
+  let widget = await generateWidget();
+  widget.presentMedium();
+}
+
+// 生成小组件
+async function generateWidget() {
   let widget = new ListWidget();
   widget.backgroundColor = new Color("#f2f2f7");
-
-  let title = widget.addText("快捷启动中心");
-  title.font = Font.boldSystemFont(16);
-  title.textColor = new Color("#333333");
-  title.centerAlignText();
-  widget.addSpacer(10);
 
   const iconSize = 30;
   const itemsPerRow = 8;
@@ -152,23 +160,28 @@ async function previewSettings() {
     widget.addSpacer(10);
   }
 
-  if (config.runsInWidget) {
-    return widget;
-  } else {
-    widget.presentMedium();
-  }
+  return widget;
 }
 
 // 加载图标
 async function loadImage(url) {
   try {
-    let req = new Request(url);
-    return await req.loadImage();
+    if (url.startsWith("file://")) {
+      return Image.fromFile(url.replace("file://", ""));
+    } else {
+      let req = new Request(url);
+      return await req.loadImage();
+    }
   } catch (e) {
     return Image.fromFile(fm.joinPath(fm.documentsDirectory(), "placeholder.png"));
   }
 }
 
-// 直接进入设置界面
-await showSettings();
+// 判断运行环境
+if (config.runsInWidget) {
+  let widget = await generateWidget();
+  Script.setWidget(widget);
+} else {
+  await showSettings();
+}
 Script.complete();
