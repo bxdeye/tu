@@ -77,7 +77,8 @@ async function showSettings() {
   let previewButton = previewRow.addButton("预览效果");
   previewButton.centerAligned();
   previewButton.onTap = async () => {
-    await previewSettings();
+    let widget = await generateWidget();
+    widget.presentMedium();
   };
   table.addRow(previewRow);
 
@@ -114,12 +115,6 @@ async function editLink(index) {
   await showSettings();
 }
 
-// 预览小组件
-async function previewSettings() {
-  let widget = await generateWidget();
-  widget.presentMedium();
-}
-
 // 生成小组件
 async function generateWidget() {
   let widget = new ListWidget();
@@ -131,7 +126,7 @@ async function generateWidget() {
   const totalRows = Math.ceil(actions.length / itemsPerRow);
 
   const totalHeight = totalRows * iconSize + (totalRows - 1) * spacing;
-  const verticalPadding = Math.max(0, (widget.size.height - totalHeight) / 2);
+  const verticalPadding = Math.max(0, (168 - totalHeight) / 2); // 小组件标准高度为 168 点
 
   widget.setPadding(verticalPadding, 10, verticalPadding, 10); // 上、右、下、左留白设置
 
