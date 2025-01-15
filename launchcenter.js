@@ -122,17 +122,22 @@ async function generateWidget() {
 
   const iconSize = 30; // 图标大小
   const spacing = 5; // 图标间隔
-  const itemsPerRow = 8;
-  const totalRows = Math.ceil(actions.length / itemsPerRow);
+  const itemsPerRow = 8; // 每行显示的图标数量
+  const totalRows = Math.ceil(actions.length / itemsPerRow); // 计算行数
 
-  const totalHeight = totalRows * iconSize + (totalRows - 1) * spacing;
-  const verticalPadding = Math.max(0, (168 - totalHeight) / 2); // 小组件标准高度为 168 点
+  const totalHeight = totalRows * iconSize + (totalRows - 1) * spacing; // 计算图标总高度
+  const widgetHeight = 168; // 小组件标准高度
+  const extraShift = 3; // 向下微调的额外像素
 
-  widget.setPadding(verticalPadding, 10, verticalPadding, 10); // 上、右、下、左留白设置
+  // 调整上下间距
+  const topPadding = Math.max(0, (widgetHeight - totalHeight) / 2 - extraShift);
+  const bottomPadding = Math.max(0, (widgetHeight - totalHeight) / 2 + extraShift);
+
+  widget.setPadding(topPadding, 10, bottomPadding, 10); // 设置上、右、下、左留白
 
   for (let row = 0; row < totalRows; row++) {
     let rowStack = widget.addStack();
-    rowStack.spacing = spacing; // 设置行内图标间隔
+    rowStack.spacing = spacing; // 设置图标之间的间距
     rowStack.centerAlignContent();
 
     for (let col = 0; col < itemsPerRow; col++) {
@@ -142,7 +147,7 @@ async function generateWidget() {
       let action = actions[index];
       let buttonStack = rowStack.addStack();
       buttonStack.layoutVertically();
-      buttonStack.setPadding(3, 3, 3, 3); // 紧凑显示按钮
+      buttonStack.setPadding(3, 3, 3, 3); // 图标边距
       buttonStack.url = action.url || "#";
 
       try {
@@ -150,7 +155,7 @@ async function generateWidget() {
         let iconImage = await req.loadImage();
         let icon = buttonStack.addImage(iconImage);
         icon.imageSize = new Size(iconSize, iconSize);
-        icon.cornerRadius = 6;
+        icon.cornerRadius = 6; // 圆角处理
       } catch (e) {
         let placeholder = buttonStack.addText("🚫");
         placeholder.font = Font.boldSystemFont(14);
@@ -158,7 +163,7 @@ async function generateWidget() {
         placeholder.centerAlignText();
       }
     }
-    widget.addSpacer(spacing); // 设置行间距
+    widget.addSpacer(spacing); // 添加行间距
   }
 
   return widget;
