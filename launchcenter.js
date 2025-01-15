@@ -125,13 +125,14 @@ async function generateWidget() {
   let widget = new ListWidget();
   widget.backgroundColor = new Color("#f2f2f7");
 
-  const iconSize = 30;
+  const iconSize = 30; // 图标大小
+  const spacing = 5; // 图标间隔，调整此值可减少间距
   const itemsPerRow = 8;
   const totalRows = Math.ceil(actions.length / itemsPerRow);
 
   for (let row = 0; row < totalRows; row++) {
     let rowStack = widget.addStack();
-    rowStack.spacing = 10;
+    rowStack.spacing = spacing; // 设置行内图标间隔
     rowStack.centerAlignContent();
 
     for (let col = 0; col < itemsPerRow; col++) {
@@ -141,7 +142,7 @@ async function generateWidget() {
       let action = actions[index];
       let buttonStack = rowStack.addStack();
       buttonStack.layoutVertically();
-      buttonStack.setPadding(5, 5, 5, 5);
+      buttonStack.setPadding(3, 3, 3, 3); // 紧凑显示按钮
       buttonStack.url = action.url || "#";
 
       try {
@@ -157,7 +158,7 @@ async function generateWidget() {
         placeholder.centerAlignText();
       }
     }
-    widget.addSpacer(10);
+    widget.addSpacer(spacing); // 设置行间距
   }
 
   return widget;
